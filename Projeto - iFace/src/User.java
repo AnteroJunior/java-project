@@ -1,23 +1,14 @@
-/* 
+import java.io.Console;
+import java.util.ArrayList;
 
-    Create User class
-    1. login
-    2. password
-    3. nickname
-
-    New attributes
-    4. address
-    5. sex
-    6. occupation
-
-*/
 public class User {
     
     String login;
     String password;
     String nickname;
     Profile profile = null;
-
+    ArrayList<User> friends = new ArrayList<User>();
+    ArrayList<User> invites = new ArrayList<User>();
 
     public User(String login, String password, String nickname){
 
@@ -38,8 +29,42 @@ public class User {
     public void showUserInformations(){
 
         System.out.println("----------------------");
-        System.out.println("Name: " + this.nickname + "\n" + "Address: " + this.profile.address + "\n" + "Sex: " + this.profile.sex + "\n" + "Occupation: " + this.profile.occupation);
+        System.out.println("Name: " + this.nickname + "\n" + "Address: " + this.profile.address + "\n" + "Sex: " + this.profile.sex + "\n" + "Occupation: " + this.profile.occupation + "\n" + "Friends: " + friends.size());
         System.out.println("----------------------");
+    }
+
+    public void seeFriendshipInvites(){
+
+        System.out.println("You have " + invites.size() + " invites.");
+
+        Console console = System.console();
+
+        for(int i = 0; i < invites.size(); i++){
+
+            User userSendInvite = invites.get(i);
+
+            System.out.println(userSendInvite.nickname + " wants to be your friend.");
+            String answer = console.readLine("Do you accept?(Y/N) ");
+
+            if(answer.equals("Y")){
+
+                //Confirm invite
+                /* 1. Remove invite from ArrayList; 2. Insert user at friends ArrayList */
+                this.friends.add(userSendInvite);
+                this.invites.remove(userSendInvite);
+
+                userSendInvite.friends.add(this);
+
+                System.out.println("Friend added!");
+
+            } else if(answer.equals("N")) {
+
+                System.out.println("Okay. Invite removed.");
+                    
+            }
+
+        }
+
     }
 
 }

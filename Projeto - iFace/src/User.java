@@ -7,16 +7,76 @@ public class User {
     String password;
     String nickname;
     Profile profile = null;
+    boolean publicProfile = true;
     ArrayList<User> friends = new ArrayList<User>();
     ArrayList<User> invites = new ArrayList<User>();
     ArrayList<Group> groups = new ArrayList<Group>();
     ArrayList<Message> inbox = new ArrayList<Message>();
+    ArrayList<Message> posts = new ArrayList<Message>();
 
     public User(String login, String password, String nickname){
 
         this.login = login;
         this.password = password;
         this.nickname = nickname;
+
+    }
+
+    public void showFeed(User user){
+
+        if(publicProfile){
+
+            System.out.println(this.nickname + " feed");
+
+            for(int i = 0; i < this.posts.size(); i++){
+
+                System.out.println("Author: " + this.posts.get(i).author.nickname);
+                System.out.println("Message: " + this.posts.get(i).message);
+
+                System.out.println();
+
+            }
+
+        } else {
+
+            //Check if loggedUser is friend
+            if(this.friends.contains(user) || this.nickname.equals(user.nickname)){
+
+                for(int i = 0; i < this.posts.size(); i++){
+
+                    System.out.println("Author: " + this.posts.get(i).author.nickname);
+                    System.out.println("Message: " + this.posts.get(i).message);
+    
+                    System.out.println();
+    
+                }                
+
+            } else {
+
+                System.out.println("You cannot see this feed. First you should be friends.");
+
+            }
+
+        }
+
+    }
+
+    public void changeProfileView(){
+
+        Console console = System.console();
+
+        System.out.println("Your feed vilibility is: " + this.publicProfile);
+
+        String option = console.readLine("Change vilibility to public (P) or private (O): ");
+        if(option.equals("P")){
+
+            this.publicProfile = true;
+
+        } else if(option.equals("O")){
+
+            this.publicProfile = false;
+
+        }
 
     }
 

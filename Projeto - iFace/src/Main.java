@@ -1,19 +1,3 @@
-/* 
-    Functionalities OK
-    1. Create user
-    2. Add/Update profile
-    3. Create group
-    4. Add/Remove user from the group
-    5. Get user informations
-    6. Remove account
-
-    Updates
-    1. Remover grupos quando o dono excluir conta
-    2. Remover dos amigos quando o usuário excluir conta
-    3. Change group settings (Groups > Add/Remove users, Create group, See posts/messages)
-
-*/
-
 import java.util.*;
 import java.io.Console;
 
@@ -104,11 +88,11 @@ public class Main {
 
                 } else if(option == 3){//Send message
 
-                    System.out.println("1. User\n2. Group");
-                    //1. Specific user 2. Group
+                    System.out.println("1. User\n2. Group\n3. User feed\n4. See my messages");
+            
                     option = getOptions.nextInt();
 
-                    if(option == 1){
+                    if(option == 1){//Message to user
 
                         String destiny = console.readLine("User you want to send: ");
 
@@ -128,7 +112,7 @@ public class Main {
 
                         }
 
-                    } else if(option == 2){
+                    } else if(option == 2){//Message to group
 
                         String destiny = console.readLine("Group you want to send: ");
 
@@ -149,17 +133,44 @@ public class Main {
 
                         }
 
-                    } else {
+                    } else if(option == 3){//Message to user feed
 
-                        Group group;
+                        String destiny = console.readLine("User you want to send: ");
 
-                        for(int i = 0; i < userLogged.groups.size(); i++){
+                        if(searchUser(destiny, users_list)){
 
-                            group = userLogged.groups.get(i);
+                            String text = console.readLine("Post something: ");
 
-                            for(int j = 0; j < group.inbox.size(); j++){
+                            Message message = new Message(text, userLogged);
 
-                                System.out.println("Message: " + group.inbox.get(i).message + "\n" + "Author: " + group.inbox.get(i).author.nickname);
+                            User destinyUser = getUser(destiny, users_list);
+
+                            destinyUser.posts.add(0, message);
+
+                        } else {
+
+                            System.out.println("User not found!");
+
+                        }                        
+
+                    } else if(option == 4){
+
+                        Message message;
+
+                        for(int i = 0; i < userLogged.inbox.size(); i++){
+
+                            System.out.println("You have " + userLogged.inbox.size() + " unread messages");
+
+                            message = userLogged.inbox.get(i);
+
+                            if(!message.read){
+
+                                System.out.println("Author: " + message.author.nickname);
+                                System.out.println("Message: " + message.message);
+    
+                                System.out.println();
+
+                                userLogged.inbox.remove(message);//Message read
 
                             }
 
@@ -229,12 +240,11 @@ public class Main {
 
                     if(option == 1){//Add
 
-                        //Options: add user
                         String groupName = console.readLine("What group would you like do add members? ");
 
                         Group group = null;
 
-                        group = searchGroup(userLogged.groups, groupName);
+                        group = searchGroup(comunity_groups, groupName);
 
                         //If found
                         if(group != null){
@@ -249,7 +259,7 @@ public class Main {
 
                     } else if(option == 2){//Remove
 
-                        String groupName = console.readLine("What group would you like do remove memebers? ");
+                        String groupName = console.readLine("What group would you like do remove members? ");
 
                         Group group = null;
 
@@ -283,11 +293,11 @@ public class Main {
                             user.showUserInformations();
 
                             //See friends
-                            for(int i = 0; i < user.friends.size(); i++){
+                            /* for(int i = 0; i < user.friends.size(); i++){
 
                                 System.out.println(user.friends.get(i).nickname);
 
-                            }
+                            } */
 
                         } else {
                             
@@ -304,21 +314,77 @@ public class Main {
                 } else if(option == 7){//Remove account
 
                     System.out.println("This action cannot be undone.");
+
+                    //Friends
+                    for(int i = 0; i < userLogged.friends.size(); i++){
+
+                        User friend = userLogged.friends.get(i);
+                        friend.friends.remove(userLogged);
+
+                    }
+
+                    //Groups
+                    //All user groups
+                    for(int i = 0; i < userLogged.groups.size(); i++){
+
+                        Group group = userLogged.groups.get(i); //Group i
+
+                        if(group.userOwner.nickname.equals(userLogged.nickname)){ //If user is the owner delete group and members
+
+                            for(int j = 0; j < group.members.size(); j++){
+
+                                User user = group.members.get(j);
+
+                                user.groups.remove(group);
+
+                            }
+
+                            comunity_groups.remove(group);//Remove group
+
+                        } else {
+                            //If user is not the owner, just remove user from group
+                            group.members.remove(userLogged); 
+
+                        }
+
+                    }
                     
                     users_list.remove(userLogged);
+
+
+
                     userLogged = null;
                     isLogged = !isLogged;
 
-                } else if(option == 8){//Send message feed
+                } else if(option == 8){//See feed
 
+                    String userNickname = console.readLine("User you want to see the feed: ");
+                    
+                    User user = getUser(userNickname, users_list);
 
+                    user.showFeed(userLogged);
 
                 } else if(option == 9){//Control feed view
 
+                    userLogged.changeProfileView();
 
+                } else if(option == 10){//See group messages
 
-                } else if(option == 10){//Logout
+                    String groupName = console.readLine("Group name: ");
 
+                    Group group = searchGroup(comunity_groups, groupName);
+
+                    for(int i = 0; i < group.inbox.size(); i++){
+
+                        System.out.println("Author: " + group.inbox.get(i).author.nickname);
+                        System.out.println("Message: " + group.inbox.get(i).message);
+
+                        System.out.println();
+
+                    }
+
+                } else if(option == 11) {//Logout
+                    
                     System.out.println("Logging out!");
                     isLogged = !isLogged;
                     userLogged = null;
@@ -420,13 +486,19 @@ public class Main {
     public static void menuNotLogged(){
 
         // Sign up and login options
+        System.out.println("+----------------------------+");
         System.out.println("1. Sign up\n2. Sign in\n3. Exit");
+        System.out.println("+----------------------------+");
 
     }
 
     public static void menuLogged(){
 
-        System.out.println("1. Create or edit profile\n2. Add friends\n3. Send messages\n4. Create group\n5. Add/Remove group members\n6. Recover users informations\n7. Remove account\n8. Send Feed messages\n9. Control Feed view\n10. Logout");
+        System.out.println("+----------------------------+");
+        System.out.println("MENU");
+        System.out.println("1. Create or edit profile\n2. Add friends\n3. Send messages\n4. Create a  group or send invite\n5. Add/Remove group members\n6. Recover users informations\n7. Remove account\n8. See feed\n9. Control Feed view\n10. Infomations about groups\n11. Log out");
+
+        System.out.println("+----------------------------+");
 
     }
     

@@ -38,6 +38,7 @@ public class Group {
                 if(option.equals("Y")){//If YES
 
                     this.members.add(actualUser);
+                    actualUser.groups.add(this);
                     invite_members.remove(i);
 
                     System.out.println("User accepted with success");
@@ -73,7 +74,7 @@ public class Group {
         //If user is the owner
         if(user.nickname.equals(this.userOwner.nickname)){
 
-            //List of invite
+            //List of members
             for(int i = 0; i < this.members.size(); i++){
 
                 User actualUser = this.members.get(i);
@@ -81,6 +82,7 @@ public class Group {
                 if(actualUser.nickname.equals(option)){//User found
 
                     this.members.remove(actualUser);
+                    actualUser.groups.remove(this);
 
                     System.out.println("User removed with success");
 

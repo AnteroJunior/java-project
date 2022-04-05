@@ -9,6 +9,8 @@ public class User {
     Profile profile = null;
     ArrayList<User> friends = new ArrayList<User>();
     ArrayList<User> invites = new ArrayList<User>();
+    ArrayList<Group> groups = new ArrayList<Group>();
+    ArrayList<Message> inbox = new ArrayList<Message>();
 
     public User(String login, String password, String nickname){
 
@@ -29,8 +31,22 @@ public class User {
     public void showUserInformations(){
 
         System.out.println("----------------------");
-        System.out.println("Name: " + this.nickname + "\n" + "Address: " + this.profile.address + "\n" + "Sex: " + this.profile.sex + "\n" + "Occupation: " + this.profile.occupation + "\n" + "Friends: " + friends.size());
+        System.out.println("Name: " + this.nickname + "\n" + "Address: " + this.profile.address + "\n" + "Sex: " + this.profile.sex + "\n" + "Occupation: " + this.profile.occupation + "\n" + "Friends: " + friends.size() + "\n");
+
+        listUserGroups();
         System.out.println("----------------------");
+    }
+
+    public void listUserGroups(){
+
+        System.out.println("Groups " + groups.size());
+
+        for(int i = 0; i < groups.size(); i++){
+
+            System.out.println("Name: " + groups.get(i).name);
+
+        }
+
     }
 
     public void seeFriendshipInvites(){

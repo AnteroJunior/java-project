@@ -1,3 +1,19 @@
+/* 
+    Functionalities OK
+    1. Create user
+    2. Add/Update profile
+    3. Create group
+    4. Add/Remove user from the group
+    5. Get user informations
+    6. Remove account
+
+    Updates
+    1. Remover grupos quando o dono excluir conta
+    2. Remover dos amigos quando o usuário excluir conta
+    3. Change group settings (Groups > Add/Remove users, Create group, See posts/messages)
+
+*/
+
 import java.util.*;
 import java.io.Console;
 
@@ -14,6 +30,7 @@ public class Main {
 
         // Users list
         ArrayList <User> users_list = new ArrayList<User>();
+        ArrayList <Group> comunity_groups = new ArrayList<Group>();
 
         while(true){
 
@@ -87,21 +104,173 @@ public class Main {
 
                 } else if(option == 3){//Send message
 
+                    System.out.println("1. User\n2. Group");
+                    //1. Specific user 2. Group
+                    option = getOptions.nextInt();
 
+                    if(option == 1){
 
-                } else if(option == 4){ //Create group
+                        String destiny = console.readLine("User you want to send: ");
 
+                        if(searchUser(destiny, users_list)){
 
+                            String text = console.readLine("What's your message? ");
+
+                            Message message = new Message(text, userLogged);
+
+                            User destinyUser = getUser(destiny, users_list);
+
+                            destinyUser.inbox.add(message);
+
+                        } else {
+
+                            System.out.println("User not found!");
+
+                        }
+
+                    } else if(option == 2){
+
+                        String destiny = console.readLine("Group you want to send: ");
+
+                        Group group = null;
+                        group = searchGroup(comunity_groups, destiny);
+
+                        if(group != null){
+
+                            String text = console.readLine("What's your message? ");
+
+                            Message message = new Message(text, userLogged);
+
+                            group.inbox.add(message);
+
+                        } else {
+
+                            System.out.println("Group not found!");
+
+                        }
+
+                    } else {
+
+                        Group group;
+
+                        for(int i = 0; i < userLogged.groups.size(); i++){
+
+                            group = userLogged.groups.get(i);
+
+                            for(int j = 0; j < group.inbox.size(); j++){
+
+                                System.out.println("Message: " + group.inbox.get(i).message + "\n" + "Author: " + group.inbox.get(i).author.nickname);
+
+                            }
+
+                        }
+
+                    }
+
+                } else if(option == 4){//Create/Add group
+
+                    System.out.println("1. Send invite to a group\n2. Create a group");
+                    option = getOptions.nextInt();
+
+                    if(option == 1){//Send invite
+
+                        String groupName;    
+                        groupName = console.readLine("Please, what's the group name? ");
+
+                        Group group = null;
+
+                        group = searchGroup(comunity_groups, groupName);
+
+                        if(group != null){
+
+                            group.invite_members.add(userLogged);
+                            group.groupInformations();
+
+                        } else {
+
+                            System.out.println("Group not found");
+
+                        }
+
+                    } else if(option == 2){//Create group
+                        
+                        String groupName;
+                        String groupDescription;
+    
+                        groupName = console.readLine("Please, what's the group name? ");
+                        groupDescription = console.readLine("Insert a good description of your group: ");
+    
+                        Group newGroup = null;
+
+                        newGroup = searchGroup(comunity_groups, groupName);
+
+                        if(newGroup != null){
+
+                            System.out.println("This group is already created.");
+
+                        } else {
+
+                            newGroup = new Group(groupName, groupDescription, userLogged);
+
+                            newGroup.members.add(userLogged);//New member
+                            comunity_groups.add(newGroup);//New group to global list
+                            newGroup.groupInformations();
+
+                            System.out.println("Group created with success! Enjoy!");
+
+                        }
+                    
+                    }
 
                 } else if(option == 5){//Add group members
 
+                    System.out.println("1. Add members\n2. Remove members");
+                    option = getOptions.nextInt();
 
+                    if(option == 1){//Add
+
+                        //Options: add user
+                        String groupName = console.readLine("What group would you like do add members? ");
+
+                        Group group = null;
+
+                        group = searchGroup(userLogged.groups, groupName);
+
+                        //If found
+                        if(group != null){
+
+                            group.addMembers(userLogged);
+
+                        } else {
+
+                            System.out.println("Group not found.");
+
+                        }
+
+                    } else if(option == 2){//Remove
+
+                        String groupName = console.readLine("What group would you like do remove memebers? ");
+
+                        Group group = null;
+
+                        group = searchGroup(comunity_groups, groupName);
+
+                        //If found
+                        if(group != null){
+
+                            group.removeUser(userLogged);
+
+                        } else {
+
+                            System.out.println("Group not found.");
+
+                        }                        
+
+                    }
  
                 } else if(option == 6){ //Get user information
 
                     String userNickname = console.readLine("User nickname: ");
-
-                    System.out.println("----------------------------------");
 
                     if(searchUser(userNickname, users_list)){
 
@@ -132,11 +301,10 @@ public class Main {
 
                     }
 
-                    System.out.println("----------------------------------");
-
                 } else if(option == 7){//Remove account
 
                     System.out.println("This action cannot be undone.");
+                    
                     users_list.remove(userLogged);
                     userLogged = null;
                     isLogged = !isLogged;
@@ -258,7 +426,7 @@ public class Main {
 
     public static void menuLogged(){
 
-        System.out.println("1. Create or edit profile\n2. Add friends\n3. Send messages\n4. Create group\n5. Add group members\n6. Recover users informations\n7. Remove account\n8. Send Feed messages\n9. Control Feed view\n10. Logout");
+        System.out.println("1. Create or edit profile\n2. Add friends\n3. Send messages\n4. Create group\n5. Add/Remove group members\n6. Recover users informations\n7. Remove account\n8. Send Feed messages\n9. Control Feed view\n10. Logout");
 
     }
     
@@ -326,5 +494,25 @@ public class Main {
         return user;
 
     }
+
+    public static Group searchGroup(ArrayList<Group> groups, String groupName){
+
+        Group group = null;
+
+        for(int i = 0; i < groups.size(); i++){
+
+            if(groups.get(i).name.equals(groupName)){
+
+                group = groups.get(i);
+
+                return group;
+
+            }
+
+        }
+
+        return group;
+
+    }   
 
 }
